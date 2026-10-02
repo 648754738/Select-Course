@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.course.college.mapper.TeacherMapper">
+    
+    <resultMap type="Teacher" id="TeacherResult">
+        <result property="teacherId"    column="teacher_id"    />
+        <result property="teacherNo"    column="teacher_no"    />
+        <result property="teacherName"    column="teacher_name"    />
+        <result property="gender"    column="gender"    />
+        <result property="department"    column="department"    />
+        <result property="title"    column="title"    />
+        <result property="contact"    column="contact"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTeacherVo">
+        select teacher_id, teacher_no, teacher_name, gender, department, title, contact, create_time, update_time from teacher
+    </sql>
+
+    <select id="selectTeacherList" parameterType="Teacher" resultMap="TeacherResult">
+        <include refid="selectTeacherVo"/>
+        <where>  
+            deleted = 0
+            <if test="teacherNo != null  and teacherNo != ''"> and teacher_no like concat('%', #{teacherNo}, '%')</if>
+            <if test="teacherName != null  and teacherName != ''"> and teacher_name like concat('%', #{teacherName}, '%')</if>
+            <if test="gender != null  and gender != ''"> and gender = #{gender}</if>
+            <if test="department != null  and department != ''"> and department like concat('%', #{department}, '%')</if>
+            <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="contact != null  and contact != ''"> and contact = #{contact}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectTeacherByTeacherId" parameterType="Long" resultMap="TeacherResult">
+        <include refid="selectTeacherVo"/>
+        where teacher_id = #{teacherId} and deleted = 0
+    </select>
+
+    <select id="selectTeacherByName" parameterType="String" resultMap="TeacherResult">
+        <include refid="selectTeacherVo"/>
+        where teacher_name = #{teacherName} and deleted = 0
+        limit 1
+    </select>
+
+    <select id="selectTeacherByNo" parameterType="String" resultMap="TeacherResult">
+        <include refid="selectTeacherVo"/>
+        where teacher_no = #{teacherNo} and deleted = 0
+        limit 1
+    </select>
+        
+    <insert id="insertTeacher" parameterType="Teacher" useGeneratedKeys="true" keyProperty="teacherId">
+        insert into teacher
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teacherNo != null and teacherNo != ''">teacher_no,</if>
+            <if test="teacherName != null and teacherName != ''">teacher_name,</if>
+            <if test="gender != null and gender != ''">gender,</if>
+            <if test="department != null and department != ''">department,</if>
+            <if test="title != null">title,</if>
+            <if test="contact != null">contact,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teacherNo != null and teacherNo != ''">#{teacherNo},</if>
+            <if test="teacherName != null and teacherName != ''">#{teacherName},</if>
+            <if test="gender != null and gender != ''">#{gender},</if>
+            <if test="department != null and department != ''">#{department},</if>
+            <if test="title != null">#{title},</if>
+            <if test="contact != null">#{contact},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTeacher" parameterType="Teacher">
+        update teacher
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teacherNo != null and teacherNo != ''">teacher_no = #{teacherNo},</if>
+            <if test="teacherName != null and teacherName != ''">teacher_name = #{teacherName},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="department != null and department != ''">department = #{department},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="contact != null">contact = #{contact},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where teacher_id = #{teacherId}
+    </update>
+
+    <delete id="deleteTeacherByTeacherId" parameterType="Long">
+        update teacher set deleted = 1 where teacher_id = #{teacherId}
+    </delete>
+
+    <delete id="deleteTeacherByTeacherIds" parameterType="String">
+        update teacher set deleted = 1 where teacher_id in 
+        <foreach item="teacherId" collection="array" open="(" separator="," close=")">
+            #{teacherId}
+        </foreach>
+    </delete>
+</mapper>
